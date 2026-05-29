@@ -1,0 +1,14 @@
+import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  use: {
+    baseURL: 'http://127.0.0.1:4173'
+  },
+  webServer: {
+    command: 'pnpm dev:chrome-extension',
+    url: 'http://127.0.0.1:4173/newtab/',
+    reuseExistingServer: true,
+    timeout: 120000
+  }
+})

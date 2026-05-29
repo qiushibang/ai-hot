@@ -1,0 +1,11 @@
+{
+  "name": "@ai-hot/chrome-extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/generate-icons.cjs && vite build",
+    "dev": "vite --host 127.0.0.1 --port 4173",
+    "preview": "vite preview --host 127.0.0.1 --port 4173"
+  }
+}

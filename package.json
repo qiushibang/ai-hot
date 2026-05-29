@@ -1,0 +1,42 @@
+{
+  "name": "ai-hot",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc -p tsconfig.base.json --noEmit",
+    "dev:chrome-extension": "vite --config apps/chrome-extension/vite.config.ts",
+    "preview:chrome-extension": "vite --config apps/chrome-extension/vite.config.ts",
+    "dev:companion-service": "pnpm --filter @ai-hot/companion-service dev",
+    "start:companion-service": "pnpm --filter @ai-hot/companion-service start",
+    "run:daily-update": "tsx scripts/run-daily-update.ts",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --no-config-lookup --parser @typescript-eslint/parser --global describe --global expect --global test --rule 'no-unused-vars:error'",
+    "postinstall": "node-gyp rebuild --directory node_modules/.pnpm/better-sqlite3@12.10.0/node_modules/better-sqlite3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/parser": "^8.46.4",
+    "@vitejs/plugin-react": "5",
+    "eslint": "^9.39.1",
+    "jsdom": "^29.1.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.0",
+    "vite": "^7.3.1",
+    "vitest": "^3.2.0"
+  },
+  "dependencies": {
+    "@ai-hot/shared": "workspace:*",
+    "better-sqlite3": "^12.10.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "zod": "^3.24.1"
+  }
+}

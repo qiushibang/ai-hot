@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'DM Sans', -apple-system, 'Helvetica Neue', sans-serif;
+  --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+}
+
+/* ── Dark Mode (default) ── */
+[data-theme='dark'] {
+  --color-bg: #080b10;
+  --color-surface: #11151d;
+  --color-surface-raised: #181c26;
+  --color-accent: #c9a96e;
+  --color-accent-soft: rgba(201, 169, 110, 0.12);
+  --color-accent-glow: rgba(201, 169, 110, 0.25);
+  --color-text: #ede4d3;
+  --color-text-muted: rgba(237, 228, 211, 0.55);
+  --color-border: rgba(237, 228, 211, 0.08);
+  --color-border-strong: rgba(237, 228, 211, 0.14);
+  --color-success: #8fb996;
+  --color-error: #d4a853;
+  --color-dot: #8fb996;
+  --color-dot-glow: rgba(143, 185, 150, 0.6);
+  --grain-opacity: 0.035;
+}
+
+/* ── Light Mode ── */
+[data-theme='light'] {
+  --color-bg: #f5f0e7;
+  --color-surface: #ffffff;
+  --color-surface-raised: #faf7f0;
+  --color-accent: #8b3a3a;
+  --color-accent-soft: rgba(139, 58, 58, 0.08);
+  --color-accent-glow: rgba(139, 58, 58, 0.18);
+  --color-text: #1a1a1a;
+  --color-text-muted: rgba(26, 26, 26, 0.55);
+  --color-border: rgba(26, 26, 26, 0.07);
+  --color-border-strong: rgba(26, 26, 26, 0.13);
+  --color-success: #2d6a5e;
+  --color-error: #b85c38;
+  --color-dot: #2d6a5e;
+  --color-dot-glow: rgba(45, 106, 94, 0.5);
+  --grain-opacity: 0.018;
+}
+
+/* ── Base Reset ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Grain Overlay ── */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+}
+
+/* ── Staggered Reveal Animation ── */
+@keyframes fadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-1 { animation: fadeRise 0.55s var(--transition-smooth) 0.05s both; }
+.stagger-2 { animation: fadeRise 0.55s var(--transition-smooth) 0.12s both; }
+.stagger-3 { animation: fadeRise 0.55s var(--transition-smooth) 0.19s both; }
+.stagger-4 { animation: fadeRise 0.55s var(--transition-smooth) 0.26s both; }
+.stagger-5 { animation: fadeRise 0.55s var(--transition-smooth) 0.33s both; }
+.stagger-6 { animation: fadeRise 0.55s var(--transition-smooth) 0.40s both; }
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 12px var(--color-dot-glow); }
+  50% { box-shadow: 0 0 24px var(--color-dot-glow); }
+}
+
+/* ── Theme Toggle ── */
+.theme-toggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-raised);
+  cursor: pointer;
+  transition: background var(--transition-smooth), border var(--transition-smooth);
+  flex-shrink: 0;
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  transition: transform var(--transition-smooth);
+}
+
+[data-theme='light'] .theme-toggle {
+  background: var(--color-accent-soft);
+}
+
+[data-theme='light'] .theme-toggle::after {
+  transform: translateX(22px);
+}
+
+/* ── Custom Checkbox ── */
+.platform-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--color-border-strong);
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.platform-checkbox:checked {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.platform-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
