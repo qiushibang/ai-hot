@@ -52,6 +52,12 @@ AI 热点聚合浏览器扩展 — 在新标签页中浏览 GitHub、X、YouTube
   <img src="docs/screenshots/05-push-records.png" alt="推送记录" width="80%" />
 </p>
 
+### 收藏箱
+
+<p align="center">
+  <img src="docs/screenshots/06-favorites-panel.png" alt="收藏箱" width="80%" />
+</p>
+
 ## 架构
 
 ```
