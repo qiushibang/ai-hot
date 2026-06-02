@@ -29,7 +29,9 @@ describe('options page', () => {
             wechatWebhookUrl: null,
             feishuAppId: null,
             feishuAppSecret: null,
-            feishuReceiveId: null
+            feishuReceiveId: null,
+            xTargetAccounts: [],
+            xMaxPerAccount: 5
           },
           error: null
         })
@@ -62,7 +64,9 @@ describe('options page', () => {
             wechatWebhookUrl: 'https://example.com/wechat',
             feishuAppId: null,
             feishuAppSecret: null,
-            feishuReceiveId: null
+            feishuReceiveId: null,
+            xTargetAccounts: [],
+            xMaxPerAccount: 5
           },
           error: null
         })
@@ -96,7 +100,9 @@ describe('options page', () => {
           wechatWebhookUrl: 'https://example.com/wechat',
           feishuAppId: null,
           feishuAppSecret: null,
-          feishuReceiveId: null
+          feishuReceiveId: null,
+          xTargetAccounts: [],
+          xMaxPerAccount: 5
         })
       })
       expect(screen.getByText('设置已保存。')).toBeDefined()

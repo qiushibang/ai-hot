@@ -3,45 +3,54 @@
 AI 热点聚合浏览器扩展 — 在新标签页中浏览 GitHub、X、YouTube、Hugging Face 的 AI 热门内容，支持一键推送到飞书和企业微信。
 
 <p align="center">
-  <img src="docs/screenshots/02-dashboard.png" alt="AI Hot Dashboard" width="100%" />
+  <img src="docs/screenshots/01-dashboard-dark.png" alt="AI Hot Dashboard - Dark Mode" width="100%" />
 </p>
 
 ## 功能特性
 
 - **多平台聚合** — 从 GitHub、X/Twitter、YouTube、Hugging Face 四个平台抓取 AI 热门内容
 - **主题搜索** — 输入自定义主题词（如 "RAG"、"LLM Agent"），精准抓取相关内容
-- **响应式卡片布局** — 根据浏览器宽度自动适应 1-4 列，完美适配不同屏幕尺寸
-- **深色/浅色模式** — 两套主题，一键切换
+- **X 账号追踪** — 支持配置 X 平台追踪账号（AI 公司、产品、领袖），按账号抓取最新动态
+- **Observatory 深色主题** — 深空观测台风格仪表盘，平台色彩识别，含浅色/深色双模式
+- **收藏与推送** — 收藏感兴趣的内容到收藏箱，支持从收藏箱一键推送
 - **飞书推送** — 配置飞书开放平台应用，将今日热点推送到飞书会话
 - **企业微信推送** — 配置企业微信机器人 Webhook，推送到群聊
-- **推送记录** — 查看历史推送记录，支持多次推送
+- **推送记录** — 查看历史推送记录，支持清空和多次推送
 - **Chrome 新标签页** — 替换浏览器默认新标签页，每次打开都是 AI 资讯看板
 
 ## 截图
 
-<table>
-  <tr>
-    <td width="50%"><img src="docs/screenshots/01-chrome-extension.png" alt="Chrome 扩展" /></td>
-    <td width="50%"><img src="docs/screenshots/06-feishu-message.png" alt="飞书消息推送" /></td>
-  </tr>
-  <tr>
-    <td align="center">Chrome 扩展管理</td>
-    <td align="center">飞书消息推送效果</td>
-  </tr>
-</table>
+### 仪表盘
 
 <table>
   <tr>
-    <td width="33%"><img src="docs/screenshots/03-feishu-config.png" alt="飞书推送配置" /></td>
-    <td width="33%"><img src="docs/screenshots/04-wecom-config.png" alt="企业微信推送配置" /></td>
-    <td width="33%"><img src="docs/screenshots/05-push-records.png" alt="推送记录" /></td>
+    <td width="50%"><img src="docs/screenshots/01-dashboard-dark.png" alt="深色模式仪表盘" /></td>
+    <td width="50%"><img src="docs/screenshots/02-dashboard-light.png" alt="浅色模式仪表盘" /></td>
+  </tr>
+  <tr>
+    <td align="center">深色模式 — Observatory 观测台风格</td>
+    <td align="center">浅色模式</td>
+  </tr>
+</table>
+
+### 配置与推送
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/03-feishu-config.png" alt="飞书推送配置" /></td>
+    <td width="50%"><img src="docs/screenshots/04-x-accounts-config.png" alt="X 账号配置" /></td>
   </tr>
   <tr>
     <td align="center">飞书推送配置</td>
-    <td align="center">企业微信推送配置</td>
-    <td align="center">推送记录</td>
+    <td align="center">X 账号配置</td>
   </tr>
 </table>
+
+### 推送记录
+
+<p align="center">
+  <img src="docs/screenshots/05-push-records.png" alt="推送记录" width="80%" />
+</p>
 
 ## 架构
 
@@ -60,13 +69,14 @@ AI 热点聚合浏览器扩展 — 在新标签页中浏览 GitHub、X、YouTube
 │  │  GitHub   │  │HuggingFace│  │ Browser Tier  │  │
 │  │ REST API  │  │ REST API  │  │ (CDP → API →  │  │
 │  │ (public)  │  │ (public)  │  │     HTML)     │  │
-│  └──────────┘  └──────────┘  │  X / YouTube / │  │
+│  └──────────┘  └──────────┘  │  X / YouTube /  │  │
 │                               │  Xiaohongshu   │  │
 │                               └───────────────┘  │
 │                                                   │
 │  ┌─────────────────────────────────────────────┐ │
 │  │           SQLite (better-sqlite3)            │ │
-│  │   feed_items / cookies / push_records / …   │ │
+│  │   feed_items / cookies / push_records /     │ │
+│  │   favorites / …                             │ │
 │  └─────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────┘
 ```

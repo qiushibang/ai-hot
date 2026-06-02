@@ -27,8 +27,8 @@ export const startCompanionService = (): Server => {
   const settingsRepository = createSettingsRepository(database)
   const cookiesRepository = createCookiesRepository(database)
 
-  const collectFeed = async (searchQuery: string) => {
-    return collectTodayFeed({ cookiesRepository, searchQuery })
+  const collectFeed = async (searchQuery: string, xTargetAccounts?: string[], xMaxPerAccount?: number) => {
+    return collectTodayFeed({ cookiesRepository, searchQuery, xTargetAccounts, xMaxPerAccount })
   }
 
   const app = createServer({

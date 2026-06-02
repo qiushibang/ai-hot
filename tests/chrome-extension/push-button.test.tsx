@@ -11,6 +11,7 @@ const DEFAULT_PROPS = {
   isCollecting: false,
   isFeishuConfigured: false,
   wechatWebhookUrl: null,
+  xTargetAccounts: [] as string[],
   itemCount: 0,
   isPushing: null as 'feishu' | 'wechat' | null,
   onSearchChange: vi.fn(),
@@ -20,6 +21,9 @@ const DEFAULT_PROPS = {
   onOpenFeishuConfig: vi.fn(),
   onOpenWechatConfig: vi.fn(),
   onOpenPushHistory: vi.fn(),
+  onOpenXAccountsConfig: vi.fn(),
+  onOpenFavorites: vi.fn(),
+  favoritesCount: 0,
   onTogglePlatform: vi.fn()
 }
 
@@ -29,7 +33,7 @@ describe('push buttons', () => {
     vi.restoreAllMocks()
   })
 
-  test('always shows all 5 buttons', () => {
+  test('always shows all 6 action buttons', () => {
     render(<FilterBar {...DEFAULT_PROPS} />)
 
     expect(screen.getByText('配置飞书')).toBeDefined()
@@ -37,6 +41,7 @@ describe('push buttons', () => {
     expect(screen.getByText('飞书推送')).toBeDefined()
     expect(screen.getByText('微信推送')).toBeDefined()
     expect(screen.getByText('推送记录')).toBeDefined()
+    expect(screen.getByText('配置 X 账号')).toBeDefined()
   })
 
   test('disables push buttons when not configured', () => {
@@ -189,5 +194,27 @@ describe('push buttons', () => {
 
     fireEvent.click(screen.getByText('推送记录'))
     expect(onOpenPushHistory).toHaveBeenCalledTimes(1)
+  })
+
+  test('calls onOpenXAccountsConfig when X accounts config button is clicked', () => {
+    const onOpenXAccountsConfig = vi.fn()
+
+    render(<FilterBar {...DEFAULT_PROPS} onOpenXAccountsConfig={onOpenXAccountsConfig} />)
+
+    fireEvent.click(screen.getByText('配置 X 账号'))
+    expect(onOpenXAccountsConfig).toHaveBeenCalledTimes(1)
+  })
+
+  test('shows account count when xTargetAccounts is configured', () => {
+    render(
+      <FilterBar
+        {...DEFAULT_PROPS}
+        xTargetAccounts={['karpathy', 'sama', 'ylecun']}
+      />
+    )
+
+    const configBtn = screen.getByText('配置 X 账号')
+    expect(configBtn).toBeDefined()
+    expect(configBtn.textContent).toContain('3')
   })
 })

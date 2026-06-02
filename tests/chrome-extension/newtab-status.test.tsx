@@ -42,7 +42,7 @@ describe('new tab status app', () => {
     render(<App />)
 
     expect(screen.getByText('正在连接本地服务…')).toBeDefined()
-    expect(await screen.findByText('已连接到本地服务')).toBeDefined()
+    expect(await screen.findByText('今日 AI 热点')).toBeDefined()
   })
 
   test('shows connected preview state when preview mode is set in the URL', async () => {
@@ -62,8 +62,8 @@ describe('new tab status app', () => {
 
     render(<App />)
 
-    expect(await screen.findByText('已连接到本地服务')).toBeDefined()
-    expect(screen.getByText('输入主题词，抓取今日 AI 热点，推送到飞书或微信。')).toBeDefined()
+    expect(await screen.findByText('今日 AI 热点')).toBeDefined()
+    expect(screen.getByText('跨平台 AI 资讯聚合，实时抓取 · 一键推送')).toBeDefined()
   })
 
   test('fetchStatus resolves to offline when localhost request times out', async () => {

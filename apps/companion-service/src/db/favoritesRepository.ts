@@ -46,6 +46,14 @@ export const createFavoritesRepository = (database: SqliteDatabase) => {
         })
 
       return favorite
+    },
+
+    remove(itemId: string): boolean {
+      const result = database
+        .prepare('DELETE FROM favorites WHERE item_id = ?')
+        .run(itemId)
+
+      return result.changes > 0
     }
   }
 }

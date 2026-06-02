@@ -12,7 +12,9 @@ export const settingsSchema = z.object({
   wechatWebhookUrl: z.string().url().nullable(),
   feishuAppId: z.string().nullable().default(null),
   feishuAppSecret: z.string().nullable().default(null),
-  feishuReceiveId: z.string().nullable().default(null)
+  feishuReceiveId: z.string().nullable().default(null),
+  xTargetAccounts: z.array(z.string()).default([]),
+  xMaxPerAccount: z.number().int().min(1).max(20).default(5)
 })
 
 export const createDefaultSettings = () =>
@@ -21,7 +23,9 @@ export const createDefaultSettings = () =>
     excludeKeywords: [],
     enabledPlatforms: ['github', 'x', 'youtube', 'huggingface'],
     feishuWebhookUrl: null,
-    wechatWebhookUrl: null
+    wechatWebhookUrl: null,
+    xTargetAccounts: [],
+    xMaxPerAccount: 5
   })
 
 export type PushChannel = z.infer<typeof pushChannelSchema>

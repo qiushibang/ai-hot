@@ -15,22 +15,22 @@ const overlay: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   padding: '24px',
-  background: 'rgba(0, 0, 0, 0.55)',
-  backdropFilter: 'blur(8px)',
-  animation: 'fadeRise 0.2s ease both'
+  background: 'rgba(0, 0, 0, 0.7)',
+  backdropFilter: 'blur(12px)',
+  animation: 'fadeIn 0.2s ease both'
 }
 
 const dialog: React.CSSProperties = {
-  width: 'min(520px, 100%)',
+  width: 'min(540px, 100%)',
   maxHeight: '85vh',
   overflowY: 'auto',
-  padding: '32px',
+  padding: '40px',
   borderRadius: 'var(--radius-xl)',
   border: '1px solid var(--color-border-strong)',
   background: 'var(--color-surface)',
   color: 'var(--color-text)',
   fontFamily: 'var(--font-body)',
-  boxShadow: '0 24px 80px rgba(0, 0, 0, 0.4)'
+  boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5)'
 }
 
 const header: React.CSSProperties = {
@@ -42,7 +42,7 @@ const header: React.CSSProperties = {
 
 const titleStyle: React.CSSProperties = {
   margin: 0,
-  fontSize: '20px',
+  fontSize: '22px',
   fontFamily: 'var(--font-display)',
   fontWeight: 600
 }

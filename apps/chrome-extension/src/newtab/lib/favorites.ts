@@ -51,3 +51,23 @@ export const createFavorite = async (
 
   return favoriteSchema.parse(payload.data)
 }
+
+export const deleteFavorite = async (
+  itemId: string,
+  fetchImplementation: typeof fetch = fetch
+): Promise<boolean> => {
+  const response = await fetchImplementation(`${COMPANION_SERVICE_ORIGIN}${API_ROUTES.favorites}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ itemId })
+  })
+  const payload = (await response.json()) as { success: boolean; data: { removed: boolean } | null; error: string | null }
+
+  if (!response.ok || !payload.success || !payload.data) {
+    throw new Error(payload.error ?? 'favorites request failed')
+  }
+
+  return payload.data.removed
+}

@@ -106,7 +106,9 @@ describe('shared domain schemas and API contracts', () => {
       wechatWebhookUrl: 'https://example.com/wechat',
       feishuAppId: null,
       feishuAppSecret: null,
-      feishuReceiveId: null
+      feishuReceiveId: null,
+      xTargetAccounts: [],
+      xMaxPerAccount: 5
     })
   })
 

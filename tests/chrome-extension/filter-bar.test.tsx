@@ -1,4 +1,4 @@
-import type { FeedItem, Platform } from '@ai-hot/shared'
+import { createDefaultSettings, type FeedItem, type Platform } from '@ai-hot/shared'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { afterEach, describe, expect, test, vi } from 'vitest'
@@ -57,8 +57,9 @@ describe('filter bar', () => {
   test('renders topic search input and collect button, and filters by platform', async () => {
     const fetchStatus = vi.fn().mockResolvedValue('connected')
     const loadTodayFeed = vi.fn().mockResolvedValue(createFeed())
+    const loadSettings = vi.fn().mockResolvedValue(createDefaultSettings())
 
-    render(<App fetchStatus={fetchStatus} loadTodayFeed={loadTodayFeed} />)
+    render(<App fetchStatus={fetchStatus} loadTodayFeed={loadTodayFeed} loadSettings={loadSettings} />)
 
     await screen.findByText('AI Agent Repo')
     expect(screen.getByText('Cooking video')).toBeDefined()

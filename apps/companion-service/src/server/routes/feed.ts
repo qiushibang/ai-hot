@@ -27,7 +27,7 @@ type CollectFeedResult = {
 /* eslint-enable no-unused-vars */
 
 // eslint-disable-next-line no-unused-vars
-type CollectFeedFunction = (_searchQuery: string) => Promise<CollectFeedResult>
+type CollectFeedFunction = (_searchQuery: string, _xTargetAccounts?: string[], _xMaxPerAccount?: number) => Promise<CollectFeedResult>
 
 const createEmptyFeedRepository = (): FeedRepository => ({
   getTodayFeedByPlatform: () => [],
@@ -139,19 +139,31 @@ export const createFeedRouter = ({
       return
     }
 
-    const { searchQuery } = request.body as { searchQuery?: string }
+    const { searchQuery, xTargetAccounts, xMaxPerAccount } = request.body as {
+      searchQuery?: string
+      xTargetAccounts?: string[]
+      xMaxPerAccount?: number
+    }
 
-    if (!searchQuery || typeof searchQuery !== 'string' || searchQuery.trim().length === 0) {
+    const accounts = Array.isArray(xTargetAccounts) ? xTargetAccounts : undefined
+    const hasAccounts = accounts && accounts.length > 0
+    const query = typeof searchQuery === 'string' ? searchQuery.trim() : ''
+
+    if (query.length === 0 && !hasAccounts) {
       response.status(400).json({
         success: false,
         data: null,
-        error: 'searchQuery is required'
+        error: 'searchQuery is required (or configure X accounts)'
       })
       return
     }
 
     try {
-      const { platformBuckets, platformStatuses } = await collectFeed(searchQuery.trim())
+      const { platformBuckets, platformStatuses } = await collectFeed(
+        query,
+        accounts,
+        typeof xMaxPerAccount === 'number' && xMaxPerAccount > 0 ? xMaxPerAccount : undefined
+      )
 
       const allItems = Object.values(platformBuckets).flat()
       feedRepository.replaceTodayFeed(allItems)

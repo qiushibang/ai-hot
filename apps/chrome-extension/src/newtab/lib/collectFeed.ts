@@ -12,12 +12,14 @@ type CollectFeedResult = {
 
 export const collectFeed = async (
   searchQuery: string,
+  xTargetAccounts?: string[],
+  xMaxPerAccount?: number,
   fetchImplementation: typeof fetch = fetch
 ): Promise<TodayFeed> => {
   const response = await fetchImplementation(`${COMPANION_SERVICE_ORIGIN}${API_ROUTES.collect}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ searchQuery })
+    body: JSON.stringify({ searchQuery, xTargetAccounts, xMaxPerAccount })
   })
 
   if (!response.ok) {

@@ -10,6 +10,7 @@ import { fetchHuggingFaceFeed } from '../adapters/huggingface/fetchHuggingFaceFe
 import { fetchXFeed } from '../adapters/x/fetchXFeed'
 import { fetchXFeedViaApi } from '../adapters/x/fetchXFeedViaApi'
 import { fetchXFeedViaCDP } from '../adapters/x/fetchXFeedViaCDP'
+import { buildXSearchQuery } from '../adapters/x/buildXSearchQuery'
 import { fetchYouTubeFeed } from '../adapters/youtube/fetchYouTubeFeed'
 import { fetchYouTubeFeedViaApi } from '../adapters/youtube/fetchYouTubeFeedViaApi'
 import type { ChromeProfileResolution } from '../browser/profile/resolveChromeProfile'
@@ -49,6 +50,8 @@ export type CollectTodayFeedDependencies = {
   createCookieAuthFetcher?: typeof createCookieAuthFetcher
   chromeRemoteDebuggingUrl?: string | null
   searchQuery?: string
+  xTargetAccounts?: string[]
+  xMaxPerAccount?: number
   now?: () => string
 }
 
@@ -333,6 +336,8 @@ export const collectTodayFeed = async ({
   createCookieAuthFetcher: createCookieAuthFetcherDependency = createCookieAuthFetcher,
   chromeRemoteDebuggingUrl = process.env.CHROME_REMOTE_DEBUGGING_URL ?? null,
   searchQuery,
+  xTargetAccounts,
+  xMaxPerAccount,
   now = () => new Date().toISOString()
 }: CollectTodayFeedDependencies = {}): Promise<CollectTodayFeedResult> => {
   const currentTime = now()
@@ -389,63 +394,104 @@ export const collectTodayFeed = async ({
       await session.getCookies('youtube').then((cookie) => cookiesRepo.save('youtube', cookie))
     }
 
-    const browserResults = await Promise.all([
-      cookiesRepo
-        ? collectBrowserPlatformWithApi({
-            platform: 'x',
-            session,
-            detectPlatformLoginState: detectPlatformLoginStateDependency,
-            apiAdapter: xApiAdapter,
-            htmlAdapter: xAdapter,
-            cdpAdapter: xCdpAdapter,
-            cookiesRepo,
-            extractCookies: () => session.getCookies('x'),
-            createCookieAuthFetcher: (deps) => createCookieAuthFetcherDependency({ ...deps, csrfCookieName: 'ct0' }),
-            searchQuery,
-            now: currentTime
-          })
-        : collectBrowserPlatform({
-            platform: 'x',
-            session,
-            detectPlatformLoginState: detectPlatformLoginStateDependency,
-            adapter: xAdapter,
-            searchQuery,
-            now: currentTime
-          }),
-      cookiesRepo
-        ? collectBrowserPlatformWithApi({
-            platform: 'youtube',
-            session,
-            detectPlatformLoginState: detectPlatformLoginStateDependency,
-            apiAdapter: youtubeApiAdapter,
-            htmlAdapter: youtubeAdapter,
-            cookiesRepo,
-            extractCookies: () => session.getCookies('youtube'),
-            createCookieAuthFetcher: createCookieAuthFetcherDependency,
-            searchQuery,
-            now: currentTime
-          })
-        : collectBrowserPlatform({
-            platform: 'youtube',
-            session,
-            detectPlatformLoginState: detectPlatformLoginStateDependency,
-            adapter: youtubeAdapter,
-            searchQuery,
-            now: currentTime
-          })
-    ])
+    const accounts = xTargetAccounts?.filter(Boolean) ?? []
+    const maxPerAccount = xMaxPerAccount && xMaxPerAccount > 0 ? xMaxPerAccount : undefined
+    const usePerAccount = accounts.length > 0 && maxPerAccount !== undefined
+
+    const collectX = async (query: string): Promise<{ items: FeedItem[]; status: PlatformStatus }> => {
+      if (cookiesRepo) {
+        return collectBrowserPlatformWithApi({
+          platform: 'x',
+          session,
+          detectPlatformLoginState: detectPlatformLoginStateDependency,
+          apiAdapter: xApiAdapter,
+          htmlAdapter: xAdapter,
+          cdpAdapter: xCdpAdapter,
+          cookiesRepo,
+          extractCookies: () => session.getCookies('x'),
+          createCookieAuthFetcher: (deps) => createCookieAuthFetcherDependency({ ...deps, csrfCookieName: 'ct0' }),
+          searchQuery: query,
+          now: currentTime
+        })
+      }
+      return collectBrowserPlatform({
+        platform: 'x',
+        session,
+        detectPlatformLoginState: detectPlatformLoginStateDependency,
+        adapter: xAdapter,
+        searchQuery: query,
+        now: currentTime
+      })
+    }
+
+    let xResult: { items: FeedItem[]; status: PlatformStatus }
+
+    if (usePerAccount) {
+      const perAccountQueries = accounts.map((account) =>
+        buildXSearchQuery(searchQuery ?? '', [account])
+      )
+
+      const perAccountResults = await Promise.all(perAccountQueries.map((q) => collectX(q)))
+
+      const seen = new Map<string, FeedItem>()
+      for (const result of perAccountResults) {
+        for (const item of result.items.slice(0, maxPerAccount)) {
+          if (!seen.has(item.id)) seen.set(item.id, item)
+        }
+      }
+
+      const mergedItems = [...seen.values()].sort(
+        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+      )
+
+      xResult = {
+        items: mergedItems,
+        status: {
+          platform: 'x',
+          state: mergedItems.length > 0 ? 'ready' : 'no_results',
+          detail: null,
+          lastUpdatedAt: currentTime,
+          lastCollectedAt: mergedItems.length > 0 ? currentTime : null
+        }
+      }
+    } else {
+      const xQuery = buildXSearchQuery(searchQuery ?? '', accounts)
+      xResult = await collectX(xQuery)
+    }
+
+    const youtubeResult = cookiesRepo
+      ? await collectBrowserPlatformWithApi({
+          platform: 'youtube',
+          session,
+          detectPlatformLoginState: detectPlatformLoginStateDependency,
+          apiAdapter: youtubeApiAdapter,
+          htmlAdapter: youtubeAdapter,
+          cookiesRepo,
+          extractCookies: () => session.getCookies('youtube'),
+          createCookieAuthFetcher: createCookieAuthFetcherDependency,
+          searchQuery,
+          now: currentTime
+        })
+      : await collectBrowserPlatform({
+          platform: 'youtube',
+          session,
+          detectPlatformLoginState: detectPlatformLoginStateDependency,
+          adapter: youtubeAdapter,
+          searchQuery,
+          now: currentTime
+        })
 
     return {
       platformBuckets: createPlatformBuckets({
         github: githubResult.items,
-        x: browserResults[0].items,
-        youtube: browserResults[1].items,
+        x: xResult.items,
+        youtube: youtubeResult.items,
         huggingface: huggingFaceResult.items
       }),
       platformStatuses: [
         githubResult.status,
-        browserResults[0].status,
-        browserResults[1].status,
+        xResult.status,
+        youtubeResult.status,
         huggingFaceResult.status
       ]
     }

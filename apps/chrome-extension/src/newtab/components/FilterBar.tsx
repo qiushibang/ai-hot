@@ -8,6 +8,7 @@ type FilterBarProps = {
   isCollecting: boolean
   isFeishuConfigured: boolean
   wechatWebhookUrl: string | null
+  xTargetAccounts: string[]
   itemCount: number
   isPushing: 'feishu' | 'wechat' | null
   onSearchChange: (value: string) => void
@@ -17,119 +18,186 @@ type FilterBarProps = {
   onOpenFeishuConfig: () => void
   onOpenWechatConfig: () => void
   onOpenPushHistory: () => void
+  onOpenXAccountsConfig: () => void
+  onOpenFavorites: () => void
+  favoritesCount: number
   onTogglePlatform: (platform: Platform) => void
 }
 /* eslint-enable no-unused-vars */
 
-const PLATFORM_OPTIONS: { label: string; platform: Platform }[] = [
-  { label: 'GitHub', platform: 'github' },
-  { label: 'X', platform: 'x' },
-  { label: 'YouTube', platform: 'youtube' },
-  { label: 'Hugging Face', platform: 'huggingface' }
+const PLATFORM_OPTIONS: { label: string; platform: Platform; color: string }[] = [
+  { label: 'GitHub', platform: 'github', color: 'var(--color-platform-github)' },
+  { label: 'X', platform: 'x', color: 'var(--color-platform-x)' },
+  { label: 'YouTube', platform: 'youtube', color: 'var(--color-platform-youtube)' },
+  { label: 'Hugging Face', platform: 'huggingface', color: 'var(--color-platform-huggingface)' }
 ]
 
-const form: React.CSSProperties = {
-  marginTop: '24px',
+const sidebar: React.CSSProperties = {
+  width: '280px',
+  flexShrink: 0,
+  position: 'sticky',
+  top: '24px',
+  alignSelf: 'flex-start',
   display: 'grid',
-  gap: '20px',
-  padding: '24px',
+  gap: '20px'
+}
+
+const section: React.CSSProperties = {
+  padding: '20px',
   borderRadius: 'var(--radius-lg)',
   border: '1px solid var(--color-border)',
-  background: 'var(--color-surface-raised)',
-  transition: 'background 0.5s ease, border 0.5s ease'
+  background: 'var(--color-surface)'
 }
 
-const row: React.CSSProperties = {
-  display: 'grid',
-  gap: '10px'
-}
-
-const label: React.CSSProperties = {
-  fontSize: '12px',
+const sectionLabel: React.CSSProperties = {
+  margin: '0 0 12px',
+  fontSize: '10px',
   fontFamily: 'var(--font-body)',
-  fontWeight: 500,
-  letterSpacing: '0.08em',
+  fontWeight: 600,
+  letterSpacing: '0.12em',
   textTransform: 'uppercase',
   color: 'var(--color-text-muted)'
 }
 
-const searchRow: React.CSSProperties = {
-  display: 'flex',
-  gap: '10px',
-  alignItems: 'flex-end'
-}
-
-const inputBase: React.CSSProperties = {
-  flex: 1,
+const input: React.CSSProperties = {
+  width: '100%',
   border: '1px solid var(--color-border-strong)',
-  borderRadius: 'var(--radius-md)',
-  padding: '12px 16px',
-  background: 'var(--color-surface)',
+  borderRadius: 'var(--radius-sm)',
+  padding: '10px 14px',
+  background: 'var(--color-surface-raised)',
   color: 'var(--color-text)',
-  fontSize: '15px',
+  fontSize: '13px',
   fontFamily: 'var(--font-body)',
   outline: 'none',
-  transition: 'border 0.25s ease, background 0.5s ease'
+  transition: 'border 0.2s ease'
 }
 
-const accentButton: React.CSSProperties = {
+const collectBtn: React.CSSProperties = {
+  width: '100%',
+  marginTop: '10px',
   border: 'none',
-  borderRadius: 'var(--radius-md)',
-  padding: '12px 22px',
+  borderRadius: 'var(--radius-sm)',
+  padding: '10px 0',
   background: 'var(--color-accent)',
   color: '#fff',
-  fontSize: '14px',
+  fontSize: '13px',
   fontWeight: 600,
   fontFamily: 'var(--font-body)',
   cursor: 'pointer',
-  whiteSpace: 'nowrap',
-  letterSpacing: '0.02em',
-  transition: 'opacity 0.25s ease, filter 0.25s ease'
+  letterSpacing: '0.03em',
+  transition: 'opacity 0.25s ease'
 }
 
-const ghostButton: React.CSSProperties = {
+const platformChips: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px'
+}
+
+const chipBase: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '8px 12px',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--color-border)',
+  background: 'var(--color-surface-raised)',
+  cursor: 'pointer',
+  fontSize: '13px',
+  fontFamily: 'var(--font-body)',
+  fontWeight: 500,
+  color: 'var(--color-text-muted)',
+  transition: 'all 0.2s ease',
+  userSelect: 'none'
+}
+
+const chipDot: React.CSSProperties = {
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  flexShrink: 0,
+  transition: 'box-shadow 0.2s ease'
+}
+
+const pushBtn: React.CSSProperties = {
+  width: '100%',
   border: '1px solid var(--color-border-strong)',
-  borderRadius: 'var(--radius-md)',
-  padding: '10px 16px',
+  borderRadius: 'var(--radius-sm)',
+  padding: '9px 0',
   background: 'transparent',
   color: 'var(--color-text)',
   fontSize: '13px',
   fontWeight: 500,
   fontFamily: 'var(--font-body)',
   cursor: 'pointer',
-  whiteSpace: 'nowrap',
   letterSpacing: '0.02em',
-  transition: 'border 0.25s ease, opacity 0.25s ease, color 0.5s ease'
+  transition: 'border 0.2s ease, opacity 0.2s ease',
+  marginBottom: '8px'
 }
 
-const pushRow: React.CSSProperties = {
-  display: 'flex',
-  gap: '10px',
-  alignItems: 'center',
-  flexWrap: 'wrap'
-}
-
-const options: React.CSSProperties = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '8px'
-}
-
-const checkboxLabel: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '8px',
-  padding: '9px 14px',
+const configBtn: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  border: 'none',
   borderRadius: 'var(--radius-sm)',
-  border: '1px solid var(--color-border)',
-  background: 'var(--color-surface)',
-  fontSize: '13px',
+  padding: '7px 12px',
+  background: 'transparent',
+  color: 'var(--color-text-muted)',
+  fontSize: '12px',
   fontFamily: 'var(--font-body)',
   fontWeight: 500,
-  color: 'var(--color-text)',
   cursor: 'pointer',
-  transition: 'background 0.5s ease, border 0.25s ease, color 0.5s ease',
-  userSelect: 'none'
+  textAlign: 'left',
+  transition: 'color 0.2s ease, background 0.2s ease'
+}
+
+const xIndicator: React.CSSProperties = {
+  display: 'inline-block',
+  marginLeft: '4px',
+  padding: '1px 7px',
+  borderRadius: '999px',
+  background: 'var(--color-accent-soft)',
+  color: 'var(--color-accent)',
+  fontSize: '10px',
+  fontFamily: 'var(--font-mono)',
+  fontWeight: 600
+}
+
+const favoritesBtn: React.CSSProperties = {
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  padding: '12px',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--color-accent)',
+  background: 'var(--color-accent-soft)',
+  color: 'var(--color-accent)',
+  fontSize: '13px',
+  fontFamily: 'var(--font-body)',
+  fontWeight: 600,
+  cursor: 'pointer',
+  letterSpacing: '0.02em',
+  transition: 'opacity 0.2s ease, background 0.2s ease'
+}
+
+const favoritesCountBadge: React.CSSProperties = {
+  marginLeft: 'auto',
+  padding: '2px 8px',
+  borderRadius: '999px',
+  background: 'var(--color-accent)',
+  color: '#fff',
+  fontSize: '11px',
+  fontFamily: 'var(--font-mono)',
+  fontWeight: 600
+}
+
+const searchHint: React.CSSProperties = {
+  marginTop: '8px',
+  fontSize: '11px',
+  lineHeight: 1.4,
+  color: 'var(--color-text-muted)',
+  fontFamily: 'var(--font-body)'
 }
 
 export const FilterBar = ({
@@ -138,6 +206,7 @@ export const FilterBar = ({
   isCollecting,
   isFeishuConfigured,
   wechatWebhookUrl,
+  xTargetAccounts,
   itemCount,
   isPushing,
   onSearchChange,
@@ -147,101 +216,153 @@ export const FilterBar = ({
   onOpenFeishuConfig,
   onOpenWechatConfig,
   onOpenPushHistory,
+  onOpenXAccountsConfig,
+  onOpenFavorites,
+  favoritesCount,
   onTogglePlatform
 }: FilterBarProps) => {
   const pushDisabled = itemCount === 0 || isPushing !== null
+  const hasXAccounts = xTargetAccounts.length > 0
+  const canCollect = searchQuery.trim().length > 0 || hasXAccounts
 
   return (
-    <form
-      style={form}
-      onSubmit={(e) => {
-        e.preventDefault()
-        onCollect()
-      }}
-    >
-      {/* Search */}
-      <div style={row}>
-        <span style={label}>主题搜索</span>
-        <div style={searchRow}>
-          <input
-            style={inputBase}
-            value={searchQuery}
-            placeholder="输入主题词，如 AI agent、LLM、RAG..."
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-          <button
-            disabled={isCollecting || searchQuery.trim().length === 0}
-            style={{
-              ...accentButton,
-              opacity: isCollecting || searchQuery.trim().length === 0 ? 0.5 : 1
-            }}
-            type="submit"
-          >
-            {isCollecting ? '抓取中…' : '抓取'}
-          </button>
-        </div>
+    <aside style={sidebar}>
+      {/* Search + Collect */}
+      <div style={section}>
+        <p style={sectionLabel}>
+          {hasXAccounts ? '主题搜索（可选）' : '主题搜索'}
+        </p>
+        <input
+          style={input}
+          value={searchQuery}
+          placeholder={
+            hasXAccounts
+              ? '进一步筛选关键词…'
+              : '输入主题词，如 AI agent…'
+          }
+          onChange={(e) => onSearchChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onCollect()
+          }}
+        />
+        <button
+          disabled={isCollecting || !canCollect}
+          style={{
+            ...collectBtn,
+            opacity: isCollecting || !canCollect ? 0.4 : 1
+          }}
+          type="button"
+          onClick={onCollect}
+        >
+          {isCollecting ? '抓取中…' : '抓取'}
+        </button>
+        {hasXAccounts ? (
+          <p style={searchHint}>
+            已配置 {xTargetAccounts.length} 个 X 账号，留空则抓取全部
+          </p>
+        ) : null}
       </div>
 
-      {/* Push */}
-      <div style={row}>
-        <span style={label}>消息推送</span>
-        <div style={pushRow}>
-          <button style={ghostButton} type="button" onClick={onOpenFeishuConfig}>
-            配置飞书
-          </button>
-          <button
-            disabled={pushDisabled || !isFeishuConfigured}
-            style={{
-              ...ghostButton,
-              opacity: pushDisabled || !isFeishuConfigured ? 0.35 : 1
-            }}
-            type="button"
-            onClick={onPushFeishu}
-          >
-            {isPushing === 'feishu' ? '推送中…' : '飞书推送'}
-          </button>
-          <button style={ghostButton} type="button" onClick={onOpenWechatConfig}>
-            配置微信
-          </button>
-          <button
-            disabled={pushDisabled || !wechatWebhookUrl}
-            style={{
-              ...ghostButton,
-              opacity: pushDisabled || !wechatWebhookUrl ? 0.35 : 1
-            }}
-            type="button"
-            onClick={onPushWechat}
-          >
-            {isPushing === 'wechat' ? '推送中…' : '微信推送'}
-          </button>
-          <button style={ghostButton} type="button" onClick={onOpenPushHistory}>
-            推送记录
-          </button>
-        </div>
-      </div>
-
-      {/* Platforms */}
-      <div style={row}>
-        <span style={label}>平台筛选</span>
-        <div style={options}>
-          {PLATFORM_OPTIONS.map(({ label: lbl, platform }) => {
-            const checked = enabledPlatforms.includes(platform)
+      {/* Platform filter chips */}
+      <div style={section}>
+        <p style={sectionLabel}>平台筛选</p>
+        <div style={platformChips}>
+          {PLATFORM_OPTIONS.map(({ label, platform, color }) => {
+            const active = enabledPlatforms.includes(platform)
 
             return (
-              <label key={platform} style={checkboxLabel}>
-                <input
-                  className="platform-checkbox"
-                  aria-label={`${lbl} 平台`}
-                  checked={checked}
-                  type="checkbox"
-                  onChange={() => onTogglePlatform(platform)}
+              <div
+                key={platform}
+                style={{
+                  ...chipBase,
+                  borderColor: active ? color : 'var(--color-border)',
+                  color: active ? 'var(--color-text)' : 'var(--color-text-muted)',
+                  background: active ? 'var(--color-surface)' : 'var(--color-surface-raised)'
+                }}
+                role="checkbox"
+                aria-checked={active}
+                aria-label={`${label} 平台`}
+                tabIndex={0}
+                onClick={() => onTogglePlatform(platform)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onTogglePlatform(platform)
+                  }
+                }}
+              >
+                <span
+                  style={{
+                    ...chipDot,
+                    background: active ? color : 'var(--color-border-strong)',
+                    boxShadow: active ? `0 0 8px ${color}80` : 'none'
+                  }}
                 />
-                {lbl}
-              </label>
+                {label}
+              </div>
             )
           })}
         </div>
       </div>
-    </form>
+
+      {/* Favorites */}
+      <button
+        style={favoritesBtn}
+        type="button"
+        onClick={onOpenFavorites}
+      >
+        ★ 收藏箱
+        {favoritesCount > 0 ? (
+          <span style={favoritesCountBadge}>{favoritesCount}</span>
+        ) : null}
+      </button>
+
+      {/* Push actions */}
+      <div style={section}>
+        <p style={sectionLabel}>消息推送</p>
+        <button
+          disabled={pushDisabled || !isFeishuConfigured}
+          style={{
+            ...pushBtn,
+            opacity: pushDisabled || !isFeishuConfigured ? 0.3 : 1
+          }}
+          type="button"
+          onClick={onPushFeishu}
+        >
+          {isPushing === 'feishu' ? '推送中…' : '飞书推送'}
+        </button>
+        <button
+          disabled={pushDisabled || !wechatWebhookUrl}
+          style={{
+            ...pushBtn,
+            opacity: pushDisabled || !wechatWebhookUrl ? 0.3 : 1
+          }}
+          type="button"
+          onClick={onPushWechat}
+        >
+          {isPushing === 'wechat' ? '推送中…' : '微信推送'}
+        </button>
+      </div>
+
+      {/* Config links */}
+      <div style={section}>
+        <p style={sectionLabel}>配置</p>
+        <button style={configBtn} type="button" onClick={onOpenFeishuConfig}>
+          配置飞书
+        </button>
+        <button style={configBtn} type="button" onClick={onOpenWechatConfig}>
+          配置微信
+        </button>
+        <button style={configBtn} type="button" onClick={onOpenXAccountsConfig}>
+          配置 X 账号
+          {xTargetAccounts.length > 0 ? (
+            <span style={xIndicator}>{xTargetAccounts.length}</span>
+          ) : null}
+        </button>
+        <button style={configBtn} type="button" onClick={onOpenPushHistory}>
+          推送记录
+        </button>
+      </div>
+    </aside>
   )
 }

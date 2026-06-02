@@ -25,7 +25,7 @@ type CreateServerDependencies = {
   platformStatusRepository?: PlatformStatusRepository
   settingsRepository?: SettingsRepository
   // eslint-disable-next-line no-unused-vars
-  collectFeed?: (_searchQuery: string) => Promise<{
+  collectFeed?: (_searchQuery: string, _xTargetAccounts?: string[], _xMaxPerAccount?: number) => Promise<{
     platformBuckets: Record<string, import('@ai-hot/shared').FeedItem[]>
     platformStatuses: import('@ai-hot/shared').PlatformStatus[]
   }>
