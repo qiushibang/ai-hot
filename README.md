@@ -13,7 +13,7 @@ AI 热点聚合浏览器扩展 — 在新标签页中浏览 GitHub、X、YouTube
 - **X 账号追踪** — 支持配置 X 平台追踪账号（AI 公司、产品、领袖），按账号抓取最新动态
 - **Observatory 深色主题** — 深空观测台风格仪表盘，平台色彩识别，含浅色/深色双模式
 - **收藏与推送** — 收藏感兴趣的内容到收藏箱，支持从收藏箱一键推送
-- **飞书推送** — 配置飞书开放平台应用，将今日热点推送到飞书会话
+- **飞书推送** — 配置飞书开放平台应用或 Webhook，将今日热点推送到飞书会话
 - **企业微信推送** — 配置企业微信机器人 Webhook，推送到群聊
 - **推送记录** — 查看历史推送记录，支持清空和多次推送
 - **Chrome 新标签页** — 替换浏览器默认新标签页，每次打开都是 AI 资讯看板
@@ -58,6 +58,156 @@ AI 热点聚合浏览器扩展 — 在新标签页中浏览 GitHub、X、YouTube
   <img src="docs/screenshots/06-favorites-panel.png" alt="收藏箱" width="80%" />
 </p>
 
+## 快速安装
+
+### 方式一：下载 Release（推荐）
+
+1. 在 [Releases](https://github.com/qiushibang/ai-hot/releases) 页面下载最新版 `ai-hot-v0.1.0.zip`
+2. 解压到任意目录（如 `~/ai-hot-extension/`）
+3. 打开 Chrome 浏览器，访问 `chrome://extensions`
+4. 开启右上角「**开发者模式**」
+5. 点击「**加载已解压的扩展程序**」
+6. 选择刚才解压的文件夹
+7. 克隆仓库并启动后端服务（见下方"启动后端服务"）
+
+### 方式二：从源码构建
+
+需要先安装 **Node.js >= 18** 和 **pnpm >= 10**：
+
+```bash
+# 克隆仓库
+git clone https://github.com/qiushibang/ai-hot.git
+cd ai-hot
+
+# 安装依赖
+pnpm install
+
+# 构建扩展
+cd apps/chrome-extension
+pnpm build
+```
+
+构建完成后，将 `apps/chrome-extension/dist` 目录加载到 Chrome 扩展中（步骤同方式一）。
+
+## 启动后端服务
+
+> **重要**：扩展需要本地后端服务才能工作，每次使用前需要启动。服务运行在 `http://127.0.0.1:4317`。
+
+```bash
+cd ai-hot
+pnpm start:companion-service
+```
+
+启动后终端保持打开即可。如果关闭终端，服务也会停止，需要重新启动。
+
+### 开机自启（可选）
+
+macOS 用户可以将服务设为登录项：
+
+```bash
+# 创建 LaunchAgent 配置文件
+mkdir -p ~/Library/LaunchAgents
+cat > ~/Library/LaunchAgents/com.ai-hot.companion.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ai-hot.companion</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/path/to/ai-hot/scripts/start-companion.sh</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
+EOF
+
+# 加载服务
+launchctl load ~/Library/LaunchAgents/com.ai-hot.companion.plist
+```
+
+> 请将 `/path/to/ai-hot` 替换为你的实际项目路径。
+
+## 使用说明
+
+### 搜索主题
+
+1. 在侧边栏搜索框中输入主题词，如 `RAG`、`LLM Agent`、`OpenAI`
+2. 点击「**抓取**」按钮
+3. 等待数据采集完成（X/YouTube 等平台需要已登录 Chrome）
+
+### 配置推送
+
+#### 飞书推送
+
+支持两种方式：
+
+| 方式 | 说明 | 需要配置 |
+|------|------|---------|
+| Webhook | 配置飞书群机器人 Webhook 地址 | Webhook URL |
+| 开放平台 API | 通过飞书开放平台应用发送消息 | App ID、App Secret、Receive ID |
+
+在设置页（右键扩展图标 → 选项）或仪表盘侧边栏的飞书配置按钮中填写。
+
+#### 企业微信推送
+
+1. 在企业微信管理后台创建群机器人
+2. 复制 Webhook 地址
+3. 在设置页中填入 Webhook URL
+
+### X 账号追踪
+
+1. 点击侧边栏「**X 账号配置**」按钮
+2. 选择预设账号或手动输入要追踪的 X 账号（如 `@OpenAI`、`@GoogleDeepMind`）
+3. 设置每个账号最大抓取条数（1-20）
+4. 抓取时会按账号分别获取最新内容
+
+### 收藏与推送
+
+- 点击卡片右上角的 ⭐ 按钮收藏内容
+- 点击侧边栏「**收藏箱**」查看已收藏内容
+- 在收藏箱中可选择推送到飞书或企业微信
+
+## 常见问题
+
+### Q: 打开新标签页显示"服务离线"？
+
+A: 请确保后端服务已启动，在终端中运行：
+
+```bash
+cd ai-hot && pnpm start:companion-service
+```
+
+### Q: X/YouTube 平台显示"无数据"或"未登录"？
+
+A: 这两个平台需要通过 Chrome 浏览器的登录态采集数据。请确保：
+1. Chrome 浏览器正在运行
+2. 已在 Chrome 中登录 X 和 YouTube
+3. 后端服务已启动
+
+### Q: 支持 Windows 或 Linux 吗？
+
+A: 扩展本身跨平台。后端服务支持 macOS、Linux、Windows，只要系统安装了 Chrome 浏览器和 Node.js。
+
+### Q: 端口 4317 被占用怎么办？
+
+A: 可以通过环境变量修改端口：
+
+```bash
+COMPANION_SERVICE_PORT=4318 pnpm start:companion-service
+```
+
+然后修改扩展的 `host_permissions` 以匹配新端口。
+
+### Q: 如何更新扩展？
+
+A: 下载最新 Release ZIP，解压到相同目录覆盖即可。Chrome 会自动识别更新。
+
 ## 架构
 
 ```
@@ -81,8 +231,8 @@ AI 热点聚合浏览器扩展 — 在新标签页中浏览 GitHub、X、YouTube
 │                                                   │
 │  ┌─────────────────────────────────────────────┐ │
 │  │           SQLite (better-sqlite3)            │ │
-│  │   feed_items / cookies / push_records /     │ │
-│  │   favorites / …                             │ │
+│  │   feed_items / cookies / favorites /        │ │
+│  │   settings / …                              │ │
 │  └─────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────┘
 ```
@@ -101,53 +251,6 @@ AI 热点聚合浏览器扩展 — 在新标签页中浏览 GitHub、X、YouTube
 | 共享类型 | Zod schema、TypeScript |
 | 测试 | Vitest、Playwright (E2E) |
 | 包管理 | pnpm 10 (monorepo) |
-
-## 快速开始
-
-### 环境要求
-
-- **Node.js** >= 18
-- **pnpm** >= 10
-- **Chrome 浏览器**（用于 X/YouTube/小红书数据采集）
-- **macOS**（Chrome Profile 自动发现依赖 macOS 特性）
-
-### 1. 安装依赖
-
-```bash
-pnpm install
-```
-
-### 2. 启动后端服务
-
-```bash
-pnpm start:companion-service
-```
-
-服务运行在 `http://127.0.0.1:4317`。
-
-### 3. 构建 Chrome 扩展
-
-```bash
-cd apps/chrome-extension
-pnpm build
-```
-
-### 4. 加载扩展
-
-1. 打开 Chrome，访问 `chrome://extensions`
-2. 开启"开发者模式"
-3. 点击"加载已解压的扩展程序"
-4. 选择 `apps/chrome-extension/dist` 目录
-
-### 5. 开发模式
-
-```bash
-# 启动前端开发服务器
-cd apps/chrome-extension && npx vite --host 127.0.0.1 --port 4173
-
-# 在浏览器中预览
-open http://127.0.0.1:4173/newtab/index.html
-```
 
 ## 项目结构
 
@@ -177,15 +280,34 @@ ai-hot/
     └── screenshots/         # 项目截图
 ```
 
-## 常用命令
+## 开发
 
 ```bash
-pnpm test              # 运行所有测试
-pnpm typecheck         # TypeScript 类型检查
-pnpm lint              # ESLint 检查
-pnpm run:daily-update  # 手动执行每日更新
+# 安装依赖
+pnpm install
+
+# 启动后端服务（开发模式，自动重启）
+pnpm start:companion-service
+
+# 启动前端开发服务器
+cd apps/chrome-extension && npx vite --host 127.0.0.1 --port 4173
+
+# 在浏览器中预览新标签页
+open http://127.0.0.1:4173/newtab/index.html
+
+# 运行测试
+pnpm test
+
+# 类型检查
+pnpm typecheck
+
+# 代码检查
+pnpm lint
+
+# 手动执行每日更新
+pnpm run:daily-update
 ```
 
 ## License
 
-MIT
+MIT © [qiushibang](https://github.com/qiushibang)
